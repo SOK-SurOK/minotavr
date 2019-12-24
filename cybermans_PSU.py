@@ -1,5 +1,6 @@
 import numpy as np
 from colorama import init, Fore, Back, Style
+import argparse
 
 
 def found(path_arr0, start_point, fin_point):
@@ -130,83 +131,56 @@ def str_to_list(s):
     return ll
 
 
-def main():
-    # Выход из лабиринта .Волновой алгоритм
-    # labirint0 = np.array([
-    #     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    #     [1, 0, 0, 0, 0, 2, 0, 0, 0, 1],
-    #     [1, 0, 1, 1, 1, 1, 0, 1, 1, 1],
-    #     [1, 0, 1, 1, 0, 0, 0, 1, 1, 1],
-    #     [1, 0, 1, 1, 0, 1, 0, 0, 2, 1],
-    #     [1, 0, 0, 0, 0, 1, 0, 1, 0, 1],
-    #     [1, 1, 0, 1, 1, 1, 0, 1, 0, 1],
-    #     [0, 0, 1, 0, 1, 1, 0, 0, 0, 1],
-    #     [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-    #     [1, 0, 1, 1, 1, 1, 1, 1, 1, 1]
-    # ])
-    s = None
-    with open("arr.txt", "r") as file:
+def file_to_arr(f_name):
+    with open(f_name, "r") as file:
         s = file.readlines()
     s = ''.join(s)
-    # return
-    # s = "1 1 1 1 1 1 1 1 1 1 \n \
-    #      1 0 0 0 0 2 0 0 0 1 \n \
-    #      1 0 1 1 1 1 0 1 1 1 \n \
-    #      1 0 1 1 0 0 0 1 1 1 \n \
-    #      1 0 1 1 0 1 0 0 2 1 \n \
-    #      1 0 0 0 0 1 0 1 0 1 \n \
-    #      1 1 0 1 1 1 0 1 0 1 \n \
-    #      0 0 1 0 1 1 0 0 0 1 \n \
-    #      1 0 0 0 0 0 0 1 0 1 \n \
-    #      1 0 1 1 1 1 1 1 1 1"
+    return str_to_list(s)
 
-    # Координаты входа [2,0], координаты выхода [7,0]. В которой 1 - это стена, 0 - это путь.
-    labirint0 = str_to_list(s)
-    # print(labirint0)
-    labirint = labirint0 % 2
-    # print(labirint0)
-    # pozIn = (2, 0)
-    # pozOut = (7, 0)
 
-    poz_in, poz_out = get_mas_in_out_point(labirint0)
-    # pozIn = poz_in[1]
+def get_all_param_path(poz_in, poz_outs, labirint):
+    param = []  # [len, strat, end]
+    for pozOut in poz_outs:
+        w, _ = found(labirint, poz_in, pozOut)
+        param.append((w, poz_in, pozOut))
+    return param
 
-    param1 = []  # [len, strat, end]
-    pozIn = poz_in[0]
-    for pozOut in poz_out:
-        w, path = found(labirint, pozIn, pozOut)
-        param1.append((w, pozIn, pozOut))
 
-    param2 = []  # [len, strat, end]
-    pozIn = poz_in[1]
-    for pozOut in poz_out:
-        w, path = found(labirint, pozIn, pozOut)
-        param2.append((w, pozIn, pozOut))
-
-    best_param = []  # [len, start1, end1, start2, end2]
-    flag = True
+def get_best_param_of_two(param1, param2):
+    best_param = None  # [len, start1, end1, start2, end2]
     for p1 in param1:
         for p2 in param2:
             if p1[2] != p2[2]:
-                if flag or best_param[0] > p1[0] + p2[0]:
-                    flag = False
-                    best_param = [p1[0] + p2[0], p1[1], p1[2], p2[1], p2[2]]
+                if best_param is None or best_param[0] > p1[0] + p2[0]:
+                    best_param = (p1[0] + p2[0], [[p1[1], p1[2]], [p2[1], p2[2]]])
+    return best_param
 
-    w1, path_best1 = found(labirint, best_param[1], best_param[2])
-    # print(best_param)
 
-    result1 = best_path(path_best1, best_param[2], labirint)
+def get_print_param(best_param, labirint, lab_print):
+    _, path = found(labirint, best_param[0], best_param[1])
+    return best_path(path, best_param[1], lab_print)
 
-    w2, path_best2 = found(labirint, best_param[3], best_param[4])
-    result2 = best_path(path_best2, best_param[4], result1)
 
-    color_print(result2)
-    # print(result1)
-    # print(result2)
-    # print(result1 & result2)
-    # print(w)
-    # result = best_path(path, pozOut, labirint)
-    # print(result)
+def main():
+    # parser = argparse.ArgumentParser(description='minotavr')
+    # parser.add_argument('f', type=str, help="Path to the query file")
+    # args = parser.parse_args()
+    # labirint0 = file_to_arr(args.f)
+    labirint0 = file_to_arr('arr.txt')
+    labirint = labirint0 % 2
+
+    poz_ins, poz_outs = get_mas_in_out_point(labirint0)
+
+    params = []
+    for pozIn in poz_ins:
+        params.append(get_all_param_path(pozIn, poz_outs, labirint))
+
+    best_params = get_best_param_of_two(params[0], params[1])
+
+    res = get_print_param(best_params[1][0], labirint, labirint)
+    res = get_print_param(best_params[1][1], labirint, res)
+
+    color_print(res)
 
 
 if __name__ == '__main__':
