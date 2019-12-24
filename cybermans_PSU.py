@@ -132,6 +132,11 @@ def str_to_list(s):
 
 
 def file_to_arr(f_name):
+    """
+    Прочитать файл в массив
+    :param f_name: имя файла
+    :return: np-array
+    """
     with open(f_name, "r") as file:
         s = file.readlines()
     s = ''.join(s)
@@ -139,15 +144,28 @@ def file_to_arr(f_name):
 
 
 def get_all_param_path(poz_in, poz_outs, labirint):
-    param = []  # [len, strat, end]
-    for pozOut in poz_outs:
-        w, _ = found(labirint, poz_in, pozOut)
-        param.append((w, poz_in, pozOut))
+    """
+    Все варианты 'лучших' путей выхода
+    :param poz_in: наачальная точка
+    :param poz_outs: список выходов
+    :param labirint: лабиринт
+    :return: [len, start, end]...
+    """
+    param = []
+    for poz_out in poz_outs:
+        w, _ = found(labirint, poz_in, poz_out)
+        param.append((w, poz_in, poz_out))
     return param
 
 
 def get_best_param_of_two(param1, param2):
-    best_param = None  # [len, start1, end1, start2, end2]
+    """
+    Наилучший выход для 2 участников
+    :param param1: лучшие параметры первого
+    :param param2: лучшие параметры второго
+    :return: (len, [ [start1, end1], [start2, end2] ])
+    """
+    best_param = None
     for p1 in param1:
         for p2 in param2:
             if p1[2] != p2[2]:
@@ -157,23 +175,30 @@ def get_best_param_of_two(param1, param2):
 
 
 def get_print_param(best_param, labirint, lab_print):
+    """
+    Напечатать лучший выход
+    :param best_param: лучший параметр
+    :param labirint: лабиринт
+    :param lab_print: лабиринт на который накладываем
+    :return: np-array
+    """
     _, path = found(labirint, best_param[0], best_param[1])
     return best_path(path, best_param[1], lab_print)
 
 
 def main():
-    # parser = argparse.ArgumentParser(description='minotavr')
-    # parser.add_argument('f', type=str, help="Path to the query file")
-    # args = parser.parse_args()
-    # labirint0 = file_to_arr(args.f)
-    labirint0 = file_to_arr('arr.txt')
+    parser = argparse.ArgumentParser(description='minotavr')
+    parser.add_argument('f', type=str, help="Path to the query file")
+    args = parser.parse_args()
+    labirint0 = file_to_arr(args.f)
+    # labirint0 = file_to_arr('arr.txt')
     labirint = labirint0 % 2
 
     poz_ins, poz_outs = get_mas_in_out_point(labirint0)
 
     params = []
-    for pozIn in poz_ins:
-        params.append(get_all_param_path(pozIn, poz_outs, labirint))
+    for poz_in in poz_ins:
+        params.append(get_all_param_path(poz_in, poz_outs, labirint))
 
     best_params = get_best_param_of_two(params[0], params[1])
 
