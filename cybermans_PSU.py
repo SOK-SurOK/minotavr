@@ -187,11 +187,11 @@ def get_print_param(best_param, labirint, lab_print):
 
 
 def main():
-    # parser = argparse.ArgumentParser(description='minotavr')
-    # parser.add_argument('f', type=str, help="Path to the query file")
-    # args = parser.parse_args()
-    # labirint0 = file_to_arr(args.f)
-    labirint0 = file_to_arr('arr.txt')
+    parser = argparse.ArgumentParser(description='minotavr')
+    parser.add_argument('f', type=str, help="Path to the query file")
+    args = parser.parse_args()
+    labirint0 = file_to_arr(args.f)
+    # labirint0 = file_to_arr('arr.txt')
     labirint = labirint0 % 2
 
     poz_ins, poz_outs = get_mas_in_out_point(labirint0)
