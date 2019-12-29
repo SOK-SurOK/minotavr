@@ -112,7 +112,7 @@ def color_print(arr):
     print(Style.RESET_ALL, end="")
 
 
-def str_to_list(s):
+def str_to_list(s, v2):
     """
     строка в numpy массив
     :param s:
@@ -122,16 +122,23 @@ def str_to_list(s):
     ll = None
     for ss in s:
         if ll is None:
-            ll = np.array([[int(i) for i in ss.split()]])
+            if v2:
+                ll = np.array([[int(i) for i in ss.split()]])
+            else:
+                ll = np.array([[int(i) for i in ss]])
             # print(ll)
         else:
             # print(ss)
-            ll = np.append(ll, [[int(i) for i in ss.split()]], axis=0)
+            if v2:
+                ll = np.append(ll, [[int(i) for i in ss.split()]], axis=0)
+            else:
+                ll = np.append(ll, [[int(i) for i in ss]], axis=0)
+
             # print(ll)
     return ll
 
 
-def file_to_arr(f_name):
+def file_to_arr(f_name, v2):
     """
     Прочитать файл в массив
     :param f_name: имя файла
@@ -140,7 +147,7 @@ def file_to_arr(f_name):
     with open(f_name, "r") as file:
         s = file.readlines()
     s = ''.join(s)
-    return str_to_list(s)
+    return str_to_list(s, v2)
 
 
 def get_all_param_path(poz_in, poz_outs, labirint):
@@ -189,8 +196,11 @@ def get_print_param(best_param, labirint, lab_print):
 def main():
     parser = argparse.ArgumentParser(description='minotavr')
     parser.add_argument('f', type=str, help="Path to the query file")
+    parser.add_argument('-v2',  action='store_const', const=True,
+                        help='second type input')
     args = parser.parse_args()
-    labirint0 = file_to_arr(args.f)
+    v2 = args.v2
+    labirint0 = file_to_arr(args.f, v2)
     # labirint0 = file_to_arr('arr.txt')
     labirint = labirint0 % 2
 
